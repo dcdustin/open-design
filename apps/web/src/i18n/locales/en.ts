@@ -38,7 +38,7 @@ export const en: Dict = {
   'common.untitled': 'Untitled',
 
   'app.brand': 'Open Design',
-  'app.brandPill': 'Research Preview',
+  'app.brandPill': 'Preview',
   'app.brandSubtitle': 'by Nexu Labs',
   'app.welcomeLoading': 'Loading workspace…',
 

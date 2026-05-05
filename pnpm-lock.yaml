@@ -9,10 +9,10 @@ importers:
   .:
     devDependencies:
       '@open-design/tools-dev':
-        specifier: workspace:0.2.0
+        specifier: workspace:*
         version: link:tools/dev
       '@open-design/tools-pack':
-        specifier: workspace:0.2.0
+        specifier: workspace:*
         version: link:tools/pack
 
   apps/daemon:

@@ -15,14 +15,12 @@
  * after every navigation so the host can render its own counter / dots.
  */
 export function buildSrcdoc(
-  html: string,
-  options: { deck?: boolean; baseHref?: string; initialSlideIndex?: number; commentBridge?: boolean } = {}
+    html: string,
+    options: { deck?: boolean; baseHref?: string; initialSlideIndex?: number; commentBridge?: boolean } = {}
 ): string {
-  const head = html.trimStart().slice(0, 64).toLowerCase();
-  const isFullDoc = head.startsWith("<!doctype") || head.startsWith("<html");
-  const wrapped = isFullDoc
-    ? html
-    : `<!doctype html>
+    const head = html.trimStart().slice(0, 64).toLowerCase();
+    const isFullDoc = head.startsWith("<!doctype") || head.startsWith("<html");
+    const wrapped = isFullDoc ? html : `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -30,30 +28,30 @@ export function buildSrcdoc(
   </head>
   <body>${html}</body>
 </html>`;
-  const withBase = options.baseHref ? injectBaseHref(wrapped, options.baseHref) : wrapped;
-  const withShim = injectSandboxShim(withBase);
-  const withDeck = options.deck ? injectDeckBridge(withShim, options.initialSlideIndex) : withShim;
-  return options.commentBridge ? injectCommentBridge(withDeck) : withDeck;
+
+    const withBase = options.baseHref ? injectBaseHref(wrapped, options.baseHref) : wrapped;
+    const withShim = injectSandboxShim(withBase);
+    const withDeck = options.deck ? injectDeckBridge(withShim, options.initialSlideIndex) : withShim;
+    return options.commentBridge ? injectCommentBridge(withDeck) : withDeck;
 }
 
 function injectBaseHref(doc: string, baseHref: string): string {
-  const safeHref = escapeAttr(baseHref);
-  const tag = `<base href="${safeHref}">`;
-  if (/<head[^>]*>/i.test(doc)) {
-    return doc.replace(/<head[^>]*>/i, (m) => `${m}${tag}`);
-  }
-  if (/<html[^>]*>/i.test(doc)) {
-    return doc.replace(/<html[^>]*>/i, (m) => `${m}<head>${tag}</head>`);
-  }
-  return tag + doc;
+    const safeHref = escapeAttr(baseHref);
+    const tag = `<base href="${safeHref}">`;
+
+    if (/<head[^>]*>/i.test(doc)) {
+        return doc.replace(/<head[^>]*>/i, (m) => `${m}${tag}`);
+    }
+
+    if (/<html[^>]*>/i.test(doc)) {
+        return doc.replace(/<html[^>]*>/i, (m) => `${m}<head>${tag}</head>`);
+    }
+
+    return tag + doc;
 }
 
 function escapeAttr(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Sandboxed iframes (we use `sandbox="allow-scripts"`) without
@@ -65,7 +63,7 @@ function escapeAttr(value: string): string {
 // in-memory shim BEFORE any user script runs so those decks degrade
 // gracefully (position just doesn't persist across reloads).
 function injectSandboxShim(doc: string): string {
-  const shim = `<script>(function(){
+    const shim = `<script>(function(){
   function makeStore(){
     var data = {};
     var api = {
@@ -89,15 +87,18 @@ function injectSandboxShim(doc: string): string {
   tryShim('localStorage');
   tryShim('sessionStorage');
 })();</script>`;
-  if (/<head[^>]*>/i.test(doc))
-    return doc.replace(/<head[^>]*>/i, (m) => `${m}${shim}`);
-  if (/<body[^>]*>/i.test(doc))
-    return doc.replace(/<body[^>]*>/i, (m) => `${m}${shim}`);
-  return shim + doc;
+
+    if (/<head[^>]*>/i.test(doc))
+        return doc.replace(/<head[^>]*>/i, (m) => `${m}${shim}`);
+
+    if (/<body[^>]*>/i.test(doc))
+        return doc.replace(/<body[^>]*>/i, (m) => `${m}${shim}`);
+
+    return shim + doc;
 }
 
 function injectCommentBridge(doc: string): string {
-  const script = `<script data-od-comment-bridge>(function(){
+    const script = `<script data-od-comment-bridge>(function(){
   var enabled = true;
   var hoveredId = null;
   function esc(value){ try { return window.CSS && CSS.escape ? CSS.escape(value) : String(value).replace(/"/g, '\\\\"'); } catch (_) { return String(value); } }
@@ -191,17 +192,19 @@ function injectCommentBridge(doc: string): string {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', postTargets);
   else setTimeout(postTargets, 0);
 })();</script>`;
-  const style = `<style data-od-comment-bridge-style>
+
+    const style = `<style data-od-comment-bridge-style>
 html[data-od-comment-mode] [data-od-id],
 html[data-od-comment-mode] [data-screen-label] { cursor: crosshair !important; }
 </style>`;
-  const withStyle = /<\/head>/i.test(doc)
-    ? doc.replace(/<\/head>/i, style + '</head>')
-    : /<head[^>]*>/i.test(doc)
-      ? doc.replace(/<head[^>]*>/i, (m) => m + style)
-      : style + doc;
-  if (/<\/body>/i.test(withStyle)) return withStyle.replace(/<\/body>/i, script + '</body>');
-  return withStyle + script;
+
+    const withStyle = /<\/head>/i.test(doc)
+        ? doc.replace(/<\/head>/i, style + '</head>')
+        : /<head[^>]*>/i.test(doc)
+            ? doc.replace(/<head[^>]*>/i, (m) => m + style)
+            : style + doc;
+    if (/<\/body>/i.test(withStyle)) return withStyle.replace(/<\/body>/i, script + '</body>');
+    return withStyle + script;
 }
 
 // The deck bridge supports three deck conventions found across our skills
@@ -228,19 +231,21 @@ html[data-od-comment-mode] [data-screen-label] { cursor: crosshair !important; }
 // preview that's smaller than 1920x1080 — exactly what users see in the
 // sandbox iframe. `place-content: center` centers the track itself.
 function injectDeckBridge(doc: string, initialSlideIndex = 0): string {
-  const safeInitialSlideIndex = Number.isFinite(initialSlideIndex)
-    ? Math.max(0, Math.floor(initialSlideIndex))
-    : 0;
-  const styleFix = `<style data-od-deck-fix>
+    const safeInitialSlideIndex = Number.isFinite(initialSlideIndex) ? Math.max(0, Math.floor(initialSlideIndex)) : 0;
+
+    const styleFix = `<style data-od-deck-fix>
 .stage, .deck-stage, .deck-shell { place-content: center !important; }
 </style>`;
-  const docWithStyle = /<\/head>/i.test(doc)
-    ? doc.replace(/<\/head>/i, styleFix + "</head>")
-    : /<head[^>]*>/i.test(doc)
-    ? doc.replace(/<head[^>]*>/i, (m) => m + styleFix)
-    : styleFix + doc;
-  doc = docWithStyle;
-  const script = `<script>(function(){
+
+    const docWithStyle = /<\/head>/i.test(doc)
+        ? doc.replace(/<\/head>/i, styleFix + "</head>")
+        : /<head[^>]*>/i.test(doc)
+            ? doc.replace(/<head[^>]*>/i, (m) => m + styleFix)
+            : styleFix + doc;
+
+    doc = docWithStyle;
+
+    const script = `<script>(function(){
   var initialSlideIndex = ${safeInitialSlideIndex};
   var didRestoreInitialSlide = initialSlideIndex <= 0;
   function slides(){ return document.querySelectorAll('.slide'); }
@@ -489,7 +494,9 @@ function injectDeckBridge(doc: string, initialSlideIndex = 0): string {
   }
   observeSlides();
 })();</script>`;
-  if (/<\/body>/i.test(doc))
-    return doc.replace(/<\/body>/i, `${script}</body>`);
-  return doc + script;
+
+    if (/<\/body>/i.test(doc))
+        return doc.replace(/<\/body>/i, `${script}</body>`);
+
+    return doc + script;
 }
